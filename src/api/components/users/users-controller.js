@@ -56,7 +56,7 @@ async function createUser(request, response, next) {
     if (password_confirm !== password) {
       throw errorResponder(
         errorTypes.INVALID_PASSWORD,
-        'Confirm password baru tidak sama dengan password baru.'
+        'Confirm password tidak sesuai.'
       );
     } else if (successEmail == true) {
       throw errorResponder(
