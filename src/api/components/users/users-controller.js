@@ -56,7 +56,7 @@ async function createUser(request, response, next) {
     if (password_confirm !== password) {
       throw errorResponder(
         errorTypes.INVALID_PASSWORD,
-        'Failed to create user'
+        'Confirm password baru tidak sama dengan password baru.'
       );
     } else if (successEmail == true) {
       throw errorResponder(
@@ -73,6 +73,45 @@ async function createUser(request, response, next) {
       }
     }
     return response.status(200).json({ name, email });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * Handle update user request
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
+async function changePassword(request, response, next) {
+  try {
+    const id = request.params.id;
+    const password_lama = request.body.password_lama;
+    const password_baru = request.body.password_baru;
+    const confirm_password_baru = request.body.confirm_password_baru;
+
+    const success = await usersService.checkPassword(id, password_lama);
+
+    if (confirm_password_baru !== password_baru) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'Confirm password baru tidak sama dengan password baru.'
+      );
+    } else if (!success) {
+      throw errorResponder(
+        errorTypes.INVALID_CREDENTIALS,
+        'Password lama tidak sesuai.'
+      );
+    } else {
+      const successChangePassword = await usersService.changePassword(
+        id,
+        password_baru
+      );
+    }
+
+    return response.status(200).json({ id });
   } catch (error) {
     return next(error);
   }
@@ -143,5 +182,6 @@ module.exports = {
   getUser,
   createUser,
   updateUser,
+  changePassword,
   deleteUser,
 };

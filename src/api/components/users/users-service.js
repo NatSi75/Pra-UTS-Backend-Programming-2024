@@ -2,6 +2,7 @@ const usersRepository = require('./users-repository');
 const { hashPassword } = require('../../../utils/password');
 const { errorResponder, errorTypes } = require('../../../core/errors');
 const { flatMap, isEmpty } = require('lodash');
+const { passwordMatched } = require('../../../utils/password');
 
 /**
  * Get list of users
@@ -76,6 +77,52 @@ async function checkEmail(email) {
 }
 
 /**
+ * Check Password
+ * @param {string} id -Id
+ * @param {string} password_lama - Password Lama
+ * @returns {object}
+ */
+async function checkPassword(id, password_lama) {
+  const user = await usersRepository.getUser(id);
+  const userPassword = user ? user.password : '<RANDOM_PASSWORD_FILLER>';
+  const passwordChecked = await passwordMatched(password_lama, userPassword);
+
+  if (user && passwordChecked) {
+    return {
+      name: user.name,
+      email: user.email,
+      user_id: user.id,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Update existing user
+ * @param {string} id - User ID
+ * @param {string} password_baru - Password Baru
+ * @returns {boolean}
+ */
+async function changePassword(id, password_baru) {
+  const user = await usersRepository.getUser(id);
+  const hashedPassword = await hashPassword(password_baru);
+
+  // User not found
+  if (!user) {
+    return null;
+  }
+
+  try {
+    await usersRepository.changePassword(id, hashedPassword);
+  } catch (err) {
+    return null;
+  }
+
+  return true;
+}
+
+/**
  * Update existing user
  * @param {string} id - User ID
  * @param {string} name - Name
@@ -125,6 +172,8 @@ module.exports = {
   getUsers,
   getUser,
   checkEmail,
+  checkPassword,
+  changePassword,
   createUser,
   updateUser,
   deleteUser,
