@@ -1,5 +1,7 @@
 const usersRepository = require('./users-repository');
 const { hashPassword } = require('../../../utils/password');
+const { errorResponder, errorTypes } = require('../../../core/errors');
+const { flatMap, isEmpty } = require('lodash');
 
 /**
  * Get list of users
@@ -55,10 +57,22 @@ async function createUser(name, email, password) {
   try {
     await usersRepository.createUser(name, email, hashedPassword);
   } catch (err) {
-    return null;
+    return false;
   }
+}
 
-  return true;
+/**
+ * Check Email
+ * @param {string} email - Email
+ * @returns {boolean}
+ */
+async function checkEmail(email) {
+  const successEmail = await usersRepository.checkEmail(email);
+  if (isEmpty(successEmail)) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 /**
@@ -110,6 +124,7 @@ async function deleteUser(id) {
 module.exports = {
   getUsers,
   getUser,
+  checkEmail,
   createUser,
   updateUser,
   deleteUser,

@@ -1,4 +1,5 @@
 const { User } = require('../../../models');
+const { email } = require('../../../models/users-schema');
 
 /**
  * Get a list of users
@@ -15,6 +16,15 @@ async function getUsers() {
  */
 async function getUser(id) {
   return User.findById(id);
+}
+
+/**
+ * Get user detail by email
+ * @param {string} emailInput - User Input Email
+ * @returns {Promise}
+ */
+async function checkEmail(emailInput) {
+  return User.find({ email: emailInput });
 }
 
 /**
@@ -65,6 +75,7 @@ async function deleteUser(id) {
 module.exports = {
   getUsers,
   getUser,
+  checkEmail,
   createUser,
   updateUser,
   deleteUser,
