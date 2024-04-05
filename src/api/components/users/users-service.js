@@ -45,6 +45,28 @@ async function getUser(id) {
 }
 
 /**
+ * Delete user
+ * @param {string} id - User ID
+ * @returns {boolean}
+ */
+async function deleteUser(id) {
+  const user = await usersRepository.getUser(id);
+
+  // User not found
+  if (!user) {
+    return null;
+  }
+
+  try {
+    await usersRepository.deleteUser(id);
+  } catch (err) {
+    return null;
+  }
+
+  return true;
+}
+
+/**
  * Create new user
  * @param {string} name - Name
  * @param {string} email - Email
@@ -60,66 +82,6 @@ async function createUser(name, email, password) {
   } catch (err) {
     return false;
   }
-}
-
-/**
- * Check Email
- * @param {string} email - Email
- * @returns {boolean}
- */
-async function checkEmail(email) {
-  const successEmail = await usersRepository.checkEmail(email);
-  if (isEmpty(successEmail)) {
-    return false;
-  } else {
-    return true;
-  }
-}
-
-/**
- * Check Password
- * @param {string} id -Id
- * @param {string} password_lama - Password Lama
- * @returns {object}
- */
-async function checkPassword(id, password_lama) {
-  const user = await usersRepository.getUser(id);
-  const userPassword = user ? user.password : '<RANDOM_PASSWORD_FILLER>';
-  const passwordChecked = await passwordMatched(password_lama, userPassword);
-
-  if (user && passwordChecked) {
-    return {
-      name: user.name,
-      email: user.email,
-      user_id: user.id,
-    };
-  }
-
-  return null;
-}
-
-/**
- * Update existing user
- * @param {string} id - User ID
- * @param {string} password_baru - Password Baru
- * @returns {boolean}
- */
-async function changePassword(id, password_baru) {
-  const user = await usersRepository.getUser(id);
-  const hashedPassword = await hashPassword(password_baru);
-
-  // User not found
-  if (!user) {
-    return null;
-  }
-
-  try {
-    await usersRepository.changePassword(id, hashedPassword);
-  } catch (err) {
-    return null;
-  }
-
-  return true;
 }
 
 /**
@@ -147,12 +109,51 @@ async function updateUser(id, name, email) {
 }
 
 /**
- * Delete user
- * @param {string} id - User ID
+ * Check Email
+ * @param {string} email - Email
  * @returns {boolean}
  */
-async function deleteUser(id) {
+async function checkEmail(email) {
+  const successEmail = await usersRepository.getUserByEmail(email);
+  if (isEmpty(successEmail)) {
+    // Jika kosong maka tidak ada user dengan email tersebut.
+    return false;
+  } else {
+    return true;
+  }
+}
+
+/**
+ * Check Password
+ * @param {string} id -Id
+ * @param {string} password_lama - Password Lama
+ * @returns {object}
+ */
+async function checkPasswordUser(id, password_lama) {
   const user = await usersRepository.getUser(id);
+  const userPassword = user ? user.password : '<RANDOM_PASSWORD_FILLER>';
+  const passwordChecked = await passwordMatched(password_lama, userPassword);
+
+  if (user && passwordChecked) {
+    return {
+      name: user.name,
+      email: user.email,
+      user_id: user.id,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Change password existing user
+ * @param {string} id - User ID
+ * @param {string} password_baru - Password Baru
+ * @returns {boolean}
+ */
+async function changePasswordUser(id, password_baru) {
+  const user = await usersRepository.getUser(id);
+  const hashedPassword = await hashPassword(password_baru);
 
   // User not found
   if (!user) {
@@ -160,7 +161,7 @@ async function deleteUser(id) {
   }
 
   try {
-    await usersRepository.deleteUser(id);
+    await usersRepository.changePasswordUser(id, hashedPassword);
   } catch (err) {
     return null;
   }
@@ -171,10 +172,10 @@ async function deleteUser(id) {
 module.exports = {
   getUsers,
   getUser,
-  checkEmail,
-  checkPassword,
-  changePassword,
   createUser,
   updateUser,
   deleteUser,
+  checkEmail,
+  checkPasswordUser,
+  changePasswordUser,
 };

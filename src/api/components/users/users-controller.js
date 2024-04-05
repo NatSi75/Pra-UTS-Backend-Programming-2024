@@ -39,6 +39,31 @@ async function getUser(request, response, next) {
 }
 
 /**
+ * Handle delete user request
+ * @param {object} request - Express request object
+ * @param {object} response - Express response object
+ * @param {object} next - Express route middlewares
+ * @returns {object} Response object or pass an error to the next route
+ */
+async function deleteUser(request, response, next) {
+  try {
+    const id = request.params.id;
+
+    const success = await usersService.deleteUser(id);
+    if (!success) {
+      throw errorResponder(
+        errorTypes.UNPROCESSABLE_ENTITY,
+        'Failed to delete user'
+      );
+    }
+
+    return response.status(200).json({ id });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
  * Handle create user request
  * @param {object} request - Express request object
  * @param {object} response - Express response object
@@ -85,45 +110,6 @@ async function createUser(request, response, next) {
  * @param {object} next - Express route middlewares
  * @returns {object} Response object or pass an error to the next route
  */
-async function changePassword(request, response, next) {
-  try {
-    const id = request.params.id;
-    const password_lama = request.body.password_lama;
-    const password_baru = request.body.password_baru;
-    const confirm_password_baru = request.body.confirm_password_baru;
-
-    const success = await usersService.checkPassword(id, password_lama);
-
-    if (confirm_password_baru !== password_baru) {
-      throw errorResponder(
-        errorTypes.INVALID_PASSWORD,
-        'Confirm password baru tidak sama dengan password baru.'
-      );
-    } else if (!success) {
-      throw errorResponder(
-        errorTypes.INVALID_CREDENTIALS,
-        'Password lama tidak sesuai.'
-      );
-    } else {
-      const successChangePassword = await usersService.changePassword(
-        id,
-        password_baru
-      );
-    }
-
-    return response.status(200).json({ id });
-  } catch (error) {
-    return next(error);
-  }
-}
-
-/**
- * Handle update user request
- * @param {object} request - Express request object
- * @param {object} response - Express response object
- * @param {object} next - Express route middlewares
- * @returns {object} Response object or pass an error to the next route
- */
 async function updateUser(request, response, next) {
   try {
     const id = request.params.id;
@@ -153,22 +139,42 @@ async function updateUser(request, response, next) {
 }
 
 /**
- * Handle delete user request
+ * Handle change password user request
  * @param {object} request - Express request object
  * @param {object} response - Express response object
  * @param {object} next - Express route middlewares
  * @returns {object} Response object or pass an error to the next route
  */
-async function deleteUser(request, response, next) {
+async function changePassword(request, response, next) {
   try {
     const id = request.params.id;
+    const password_lama = request.body.password_lama;
+    const password_baru = request.body.password_baru;
+    const confirm_password_baru = request.body.confirm_password_baru;
 
-    const success = await usersService.deleteUser(id);
-    if (!success) {
+    const success = await usersService.checkPassword(id, password_lama);
+
+    if (confirm_password_baru !== password_baru) {
       throw errorResponder(
-        errorTypes.UNPROCESSABLE_ENTITY,
-        'Failed to delete user'
+        errorTypes.INVALID_PASSWORD,
+        'Confirm password baru tidak sesuai dengan password baru.'
       );
+    } else if (!success) {
+      throw errorResponder(
+        errorTypes.INVALID_CREDENTIALS,
+        'Password lama salah.'
+      );
+    } else {
+      const successChangePassword = await usersService.changePassword(
+        id,
+        password_baru
+      );
+      if (!successChangePassword) {
+        throw errorResponder(
+          errorTypes.UNPROCESSABLE_ENTITY,
+          'Faile to change password user.'
+        );
+      }
     }
 
     return response.status(200).json({ id });
@@ -182,6 +188,6 @@ module.exports = {
   getUser,
   createUser,
   updateUser,
-  changePassword,
   deleteUser,
+  changePassword,
 };

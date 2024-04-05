@@ -19,15 +19,6 @@ async function getUser(id) {
 }
 
 /**
- * Get user detail by email
- * @param {string} emailInput - User Input Email
- * @returns {Promise}
- */
-async function checkEmail(emailInput) {
-  return User.find({ email: emailInput });
-}
-
-/**
  * Create new user
  * @param {string} name - Name
  * @param {string} email - Email
@@ -40,25 +31,6 @@ async function createUser(name, email, password) {
     email,
     password,
   });
-}
-
-/**
- * Update existing user
- * @param {string} id - User ID
- * @param {string} password - Password Baru
- * @returns {Promise}
- */
-async function changePassword(id, password) {
-  return User.updateOne(
-    {
-      _id: id,
-    },
-    {
-      $set: {
-        password,
-      },
-    }
-  );
 }
 
 /**
@@ -91,12 +63,40 @@ async function deleteUser(id) {
   return User.deleteOne({ _id: id });
 }
 
+/**
+ * Get user detail by email
+ * @param {string} emailInput - User Input Email
+ * @returns {Promise}
+ */
+async function getUserByEmail(emailInput) {
+  return User.find({ email: emailInput });
+}
+
+/**
+ * Change password existing user
+ * @param {string} id - User ID
+ * @param {string} password - Password Baru
+ * @returns {Promise}
+ */
+async function changePasswordUser(id, password) {
+  return User.updateOne(
+    {
+      _id: id,
+    },
+    {
+      $set: {
+        password,
+      },
+    }
+  );
+}
+
 module.exports = {
   getUsers,
   getUser,
-  checkEmail,
-  changePassword,
   createUser,
   updateUser,
   deleteUser,
+  getUserByEmail,
+  changePasswordUser,
 };
