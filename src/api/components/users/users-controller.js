@@ -75,10 +75,10 @@ async function createUser(request, response, next) {
     const name = request.body.name;
     const email = request.body.email;
     const password = request.body.password;
-    const password_confirm = request.body.password_confirm;
+    const confirm_password = request.body.confirm_password;
 
     const successEmail = await usersService.checkEmail(email);
-    if (password_confirm !== password) {
+    if (confirm_password !== password) {
       throw errorResponder(
         errorTypes.INVALID_PASSWORD,
         'Confirm password tidak sesuai.'
@@ -152,7 +152,7 @@ async function changePassword(request, response, next) {
     const password_baru = request.body.password_baru;
     const confirm_password_baru = request.body.confirm_password_baru;
 
-    const success = await usersService.checkPassword(id, password_lama);
+    const success = await usersService.checkPasswordUser(id, password_lama);
 
     if (confirm_password_baru !== password_baru) {
       throw errorResponder(
@@ -165,7 +165,7 @@ async function changePassword(request, response, next) {
         'Password lama salah.'
       );
     } else {
-      const successChangePassword = await usersService.changePassword(
+      const successChangePassword = await usersService.changePasswordUser(
         id,
         password_baru
       );
