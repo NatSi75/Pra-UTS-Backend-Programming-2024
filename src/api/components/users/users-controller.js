@@ -154,15 +154,15 @@ async function changePassword(request, response, next) {
 
     const success = await usersService.checkPasswordUser(id, password_lama);
 
-    if (confirm_password_baru !== password_baru) {
-      throw errorResponder(
-        errorTypes.INVALID_PASSWORD,
-        'Confirm password baru tidak sesuai dengan password baru.'
-      );
-    } else if (!success) {
+    if (!success) {
       throw errorResponder(
         errorTypes.INVALID_CREDENTIALS,
         'Password lama salah.'
+      );
+    } else if (confirm_password_baru !== password_baru) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'Confirm password baru tidak sesuai dengan password baru.'
       );
     } else {
       const successChangePassword = await usersService.changePasswordUser(
